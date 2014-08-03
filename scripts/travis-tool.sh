@@ -242,7 +242,15 @@ RunTests() {
     if [[ "$_R_CHECK_CRAN_INCOMING_" == "FALSE" ]]; then
         echo "(CRAN incoming checks are off)"
     fi
-    _R_CHECK_CRAN_INCOMING_=${_R_CHECK_CRAN_INCOMING_} R CMD check "${FILE}" ${R_CHECK_ARGS}
+
+    _R_CHECK_FORCE_SUGGESTS_=${_R_CHECK_FORCE_SUGGESTS_:-FALSE}
+    if [[ "$_R_CHECK_FORCE_SUGGESTS_" == "FALSE" ]]; then
+        echo "(CRAN forced suggests checks are off)"
+    fi
+
+    _R_CHECK_CRAN_INCOMING_=${_R_CHECK_CRAN_INCOMING_} \
+    _R_CHECK_FORCE_SUGGESTS_=${_R_CHECK_FORCE_SUGGESTS_} \
+        R CMD check "${FILE}" ${R_CHECK_ARGS}
 
     if [[ -n "${WARNINGS_ARE_ERRORS}" ]]; then
         if DumpLogsByExtension "00check.log" | grep -q WARNING; then
