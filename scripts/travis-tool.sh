@@ -8,6 +8,7 @@ set -x
 
 CRAN=${CRAN:-"http://cran.rstudio.com"}
 BIOC=${BIOC:-"http://bioconductor.org/biocLite.R"}
+BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
 # MacTeX installs in a new $PATH entry, and there's no way to force
@@ -20,6 +21,11 @@ PATH="${PATH}:/usr/texbin"
 
 R_BUILD_ARGS=${R_BUILD_ARGS-"--no-build-vignettes --no-manual"}
 R_CHECK_ARGS=${R_CHECK_ARGS-"--no-build-vignettes --no-manual --as-cran"}
+
+R_USE_BIOC_CMDS="source('${BIOC}');"\
+" tryCatch(useDevel(${BIOC_USE_DEVEL}),"\
+" error=function(e) {if (!grepl('already in use', e$message)) {e}});"\
+" options(repos=biocinstallRepos());"
 
 Bootstrap() {
     if [[ "Darwin" == "${OS}" ]]; then
@@ -139,7 +145,7 @@ DpkgCurlInstall() {
     fi
 
     echo "Installing remote package(s) $@"
-    for rf in "$@"; do 
+    for rf in "$@"; do
         curl -OL ${rf}
         f=$(basename ${rf})
         sudo dpkg -i ${f}
@@ -153,10 +159,9 @@ RInstall() {
         exit 1
     fi
 
-    echo "Installing R package(s): ${pkg}"
+    echo "Installing R package(s): $@"
     Rscript -e 'install.packages(commandArgs(TRUE), repos="'"${CRAN}"'")' "$@"
 }
-
 
 BiocInstall() {
     if [[ "" == "$*" ]]; then
@@ -164,10 +169,9 @@ BiocInstall() {
         exit 1
     fi
 
-    echo "Installing R package(s): ${pkg}"
-    Rscript -e 'library(methods); source("'"${BIOC}"'"); biocLite(commandArgs(TRUE))' $@
+    echo "Installing R Bioconductor package(s): $@"
+    Rscript -e "${R_USE_BIOC_CMDS}"' biocLite(commandArgs(TRUE))' "$@"
 }
-
 
 RBinaryInstall() {
     if [[ -z "$#" ]]; then
@@ -201,6 +205,11 @@ InstallDeps() {
     Rscript -e 'library(devtools); library(methods); options(repos=c(CRAN="'"${CRAN}"'")); install_deps(dependencies = TRUE)'
 }
 
+InstallBiocDeps() {
+    EnsureDevtools
+    Rscript -e "${R_USE_BIOC_CMDS}"' library(devtools); install_deps(dependencies = TRUE)'
+}
+
 DumpSysinfo() {
     echo "Dumping system information."
     R -e '.libPaths(); sessionInfo(); installed.packages()'
@@ -213,7 +222,7 @@ DumpLogsByExtension() {
     fi
     extension=$1
     shift
-    package=$(find . -name *Rcheck -type d)
+    package=$(find . -maxdepth 1 -name "*.Rcheck" -type d)
     if [[ ${#package[@]} -ne 1 ]]; then
         echo "Could not find package Rcheck directory, skipping log dump."
         exit 0
@@ -251,6 +260,18 @@ RunTests() {
     _R_CHECK_CRAN_INCOMING_=${_R_CHECK_CRAN_INCOMING_} \
     _R_CHECK_FORCE_SUGGESTS_=${_R_CHECK_FORCE_SUGGESTS_} \
         R CMD check "${FILE}" ${R_CHECK_ARGS}
+
+    # Check reverse dependencies
+    if [[ -n "$R_CHECK_REVDEP" ]]; then
+        echo "Checking reverse dependencies"
+        Rscript -e 'library(devtools); checkOutput <- unlist(revdep_check(as.package(".")$package));if (!is.null(checkOutput)) {print(data.frame(pkg = names(checkOutput), error = checkOutput));for(i in seq_along(checkOutput)){;cat("\n", names(checkOutput)[i], " Check Output:\n  ", paste(readLines(regmatches(checkOutput[i], regexec("/.*\\.out", checkOutput[i]))[[1]]), collapse = "\n  ", sep = ""), "\n", sep = "")};q(status = 1, save = "no")}'
+    fi
+
+    # Create binary package (currently Windows only)
+    if [[ "${OS:0:5}" == "MINGW" ]]; then
+        echo "Creating binary package"
+        R CMD INSTALL --build "${FILE}"
+    fi
 
     if [[ -n "${WARNINGS_ARE_ERRORS}" ]]; then
         if DumpLogsByExtension "00check.log" | grep -q WARNING; then
@@ -324,6 +345,11 @@ case $COMMAND in
     ## Install package dependencies from CRAN (needs devtools)
     "install_deps")
         InstallDeps
+        ;;
+    ##
+    ## Install package dependencies from Bioconductor and CRAN (needs devtools)
+    "install_bioc_deps")
+        InstallBiocDeps
         ;;
     ##
     ## Run the actual tests, ie R CMD check
