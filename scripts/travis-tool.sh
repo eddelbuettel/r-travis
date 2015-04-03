@@ -9,6 +9,9 @@ set -x
 CRAN=${CRAN:-"http://cran.rstudio.com"}
 BIOC=${BIOC:-"http://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
+CXX=${CXX:-"g++-4.9"}
+CC=${CC:-"gcc-4.9"}
+
 OS=$(uname -s)
 
 # MacTeX installs in a new $PATH entry, and there's no way to force
@@ -51,6 +54,11 @@ BootstrapLinux() {
     # Add marutter's c2d4u repository.
     sudo add-apt-repository -y "ppa:marutter/rrutter"
     sudo add-apt-repository -y "ppa:marutter/c2d4u"
+
+    # Dirk's builds of Rcpp etc
+    sudo add-apt-repository -y ppa:edd/misc
+    # Newer gcc
+    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
     # Update after adding all repositories.  Retry several times to work around
     # flaky connection to Launchpad PPAs.
