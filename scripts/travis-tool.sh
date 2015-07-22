@@ -62,8 +62,6 @@ SetRepos() {
     echo "})" >> ~/.Rprofile
 }
 
-}
-
 InstallPandoc() {
     local os_path="$1"
     mkdir -p "${PANDOC_DIR}"
