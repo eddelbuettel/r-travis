@@ -11,6 +11,9 @@ BIOC=${BIOC:-"http://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
+## Possible drat repos, unset by default
+DRAT_REPOS=${DRAT_REPOS:-""}
+
 PANDOC_VERSION='1.13.1'
 PANDOC_DIR="${HOME}/opt/pandoc"
 PANDOC_URL="https://s3.amazonaws.com/rstudio-buildtools/pandoc-${PANDOC_VERSION}.zip"
@@ -44,6 +47,21 @@ Bootstrap() {
     if ! (test -e .Rbuildignore && grep -q 'travis-tool' .Rbuildignore); then
         echo '^travis-tool\.sh$' >>.Rbuildignore
     fi
+
+    SetRepos
+}
+
+SetRepos() {
+    echo "local({" >> ~/.Rprofile
+    echo "   r <- getOption(\"repos\");" >> ~/.Rprofile
+    echo "   r[\"CRAN\"] <- \"${CRAN}\"" >> ~/.Rprofile
+    for d in ${DRAT_REPOS}; do 
+        echo "   r[\"${d}\"] <- \"https://${d}.github.io/drat\"" >> ~/.Rprofile
+    done        
+    echo "   options(repos=r)" >> ~/.Rprofile
+    echo "})" >> ~/.Rprofile
+}
+
 }
 
 InstallPandoc() {
@@ -182,7 +200,7 @@ RInstall() {
     fi
 
     echo "Installing R package(s): $@"
-    Rscript -e 'install.packages(commandArgs(TRUE), repos="'"${CRAN}"'")' "$@"
+    Rscript -e 'install.packages(commandArgs(TRUE))' "$@"
 }
 
 BiocInstall() {
@@ -219,12 +237,12 @@ InstallGithub() {
 
     echo "Installing GitHub packages: $@"
     # Install the package.
-    Rscript -e 'library(devtools); library(methods); options(repos=c(CRAN="'"${CRAN}"'")); install_github(commandArgs(TRUE), build_vignettes = FALSE)' "$@"
+    Rscript -e 'library(devtools); library(methods); install_github(commandArgs(TRUE), build_vignettes = FALSE)' "$@"
 }
 
 InstallDeps() {
     EnsureDevtools
-    Rscript -e 'library(devtools); library(methods); options(repos=c(CRAN="'"${CRAN}"'")); install_deps(dependencies = TRUE)'
+    Rscript -e 'library(devtools); library(methods); install_deps(dependencies = TRUE)'
 }
 
 InstallBiocDeps() {
