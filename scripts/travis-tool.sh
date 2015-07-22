@@ -9,9 +9,6 @@ set -x
 CRAN=${CRAN:-"http://cran.rstudio.com"}
 BIOC=${BIOC:-"http://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
-CXX=${CXX:-"g++-4.9"}
-CC=${CC:-"gcc-4.9"}
-
 OS=$(uname -s)
 
 PANDOC_VERSION='1.13.1'
@@ -27,8 +24,7 @@ PANDOC_URL="https://s3.amazonaws.com/rstudio-buildtools/pandoc-${PANDOC_VERSION}
 PATH="${PATH}:/usr/texbin"
 
 R_BUILD_ARGS=${R_BUILD_ARGS-"--no-build-vignettes --no-manual"}
-#R_CHECK_ARGS=${R_CHECK_ARGS-"--no-build-vignettes --no-manual --as-cran"}
-R_CHECK_ARGS=${R_CHECK_ARGS-"--no-build-vignettes --no-manual"}
+R_CHECK_ARGS=${R_CHECK_ARGS-"--no-build-vignettes --no-manual --as-cran"}
 
 R_USE_BIOC_CMDS="source('${BIOC}');"\
 " tryCatch(useDevel(${BIOC_USE_DEVEL}),"\
@@ -70,11 +66,6 @@ BootstrapLinux() {
     # Add marutter's c2d4u repository.
     sudo add-apt-repository -y "ppa:marutter/rrutter"
     sudo add-apt-repository -y "ppa:marutter/c2d4u"
-
-    # Dirk's builds of Rcpp etc
-    sudo add-apt-repository -y ppa:edd/misc
-    # Newer gcc
-    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
     # Update after adding all repositories.  Retry several times to work around
     # flaky connection to Launchpad PPAs.
@@ -287,7 +278,6 @@ RunTests() {
     if [[ "$_R_CHECK_CRAN_INCOMING_" == "FALSE" ]]; then
         echo "(CRAN incoming checks are off)"
     fi
-
     _R_CHECK_CRAN_INCOMING_=${_R_CHECK_CRAN_INCOMING_} R CMD check "${FILE}" ${R_CHECK_ARGS} ${R_CHECK_INSTALL_ARGS}
 
     # Check reverse dependencies
