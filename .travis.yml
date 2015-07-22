@@ -4,14 +4,16 @@
 # FILE -- use `sample.travis.yml` instead.
 
 language: c
-# language: objective-c
 
+os:
+  - linux
+  - osx
 env:
   global:
     - OS=$(uname -s)
   matrix:
     - BOOTSTRAP_LATEX=" "
-    - R_BUILD_ARGS=" " R_CHECK_ARGS="--as-cran" BOOTSTRAP_LATEX="1" _R_CHECK_CRAN_INCOMING_=TRUE
+    - R_BUILD_ARGS=" " R_CHECK_ARGS="--as-cran" BOOTSTRAP_LATEX="1" _R_CHECK_CRAN_INCOMING_=TRUE BOOTSTRAP_PANDOC="1"
 script: ./travis-tool.sh run_tests
 notifications:
   email:
@@ -52,3 +54,4 @@ install:
   - ./travis-tool.sh dump_sysinfo | grep -q 'R version '
   - ./travis-tool.sh bioc_install GenomicFeatures AnnotationDbi
   - Rscript -e 'library(GenomicFeatures); library(AnnotationDbi)'
+  - if test ${BOOTSTRAP_PANDOC} = 1; then pandoc --version; fi
