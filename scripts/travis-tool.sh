@@ -56,7 +56,7 @@ SetRepos() {
     echo "   r <- getOption(\"repos\");" >> ~/.Rprofile
     echo "   r[\"CRAN\"] <- \"${CRAN}\"" >> ~/.Rprofile
     for d in ${DRAT_REPOS}; do 
-        echo "   r[\"${d}\"] <- \"https://${d}.github.io/drat\"" >> ~/.Rprofile
+        echo "   r[\"${d}\"] <- \"http://${d}.github.io/drat\"" >> ~/.Rprofile
     done        
     echo "   options(repos=r)" >> ~/.Rprofile
     echo "})" >> ~/.Rprofile
