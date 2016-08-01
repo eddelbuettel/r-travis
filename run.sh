@@ -48,6 +48,9 @@ Bootstrap() {
     if ! (test -e .Rbuildignore && grep -q 'travis-tool' .Rbuildignore); then
         echo '^travis-tool\.sh$' >>.Rbuildignore
     fi
+    if ! (test -e .Rbuildignore && grep -q 'run.sh' .Rbuildignore); then
+        echo '^run\.sh$' >> .Rbuildignore
+    fi
 
     SetRepos
 }
