@@ -51,6 +51,9 @@ Bootstrap() {
     if ! (test -e .Rbuildignore && grep -q 'run.sh' .Rbuildignore); then
         echo '^run\.sh$' >> .Rbuildignore
     fi
+    if ! (test -e .Rbuildignore && grep -q 'travis_wait' .Rbuildignore); then
+        echo '^travis_wait_.*\.log$' >> .Rbuildignore
+    fi
 
     SetRepos
 }
