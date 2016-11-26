@@ -285,6 +285,15 @@ DumpLogs() {
     DumpLogsByExtension "fail"
 }
 
+Coverage() {
+    echo "Running Code Coverage analysis via the covr package"
+
+    ## assumes that the Rutter PPAs are in fact known, which is a given here
+    AptGetInstall r-cran-covr        
+
+    Rscript -e "covr::codecov()"
+}
+
 RunTests() {
     echo "Building with: R CMD build ${R_BUILD_ARGS}"
     R CMD build ${R_BUILD_ARGS} .
@@ -352,6 +361,10 @@ case $COMMAND in
     ## Bootstrap a new core system
     "bootstrap")
         Bootstrap
+        ;;
+    ## Code coverage via covr.io
+    "coverage")
+        Coverage
         ;;
     ##
     ## Ensure devtools is loaded (implicitly called)
