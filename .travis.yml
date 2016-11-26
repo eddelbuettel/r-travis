@@ -7,7 +7,7 @@ language: c
 
 os:
   - linux
-  - osx
+  #- osx
 env:
   global:
     - OS=$(uname -s)
