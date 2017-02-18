@@ -7,8 +7,8 @@ set -e
 # Or ratherm set it for a lot noisier output
 # set -x
 
-CRAN=${CRAN:-"http://cran.rstudio.com"}
-BIOC=${BIOC:-"http://bioconductor.org/biocLite.R"}
+CRAN=${CRAN:-"https://cran.rstudio.com"}
+BIOC=${BIOC:-"https://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
@@ -63,7 +63,7 @@ SetRepos() {
     echo "   r <- getOption(\"repos\");" >> ~/.Rprofile
     echo "   r[\"CRAN\"] <- \"${CRAN}\"" >> ~/.Rprofile
     for d in ${DRAT_REPOS}; do 
-        echo "   r[\"${d}\"] <- \"http://${d}.github.io/drat\"" >> ~/.Rprofile
+        echo "   r[\"${d}\"] <- \"https://${d}.github.io/drat\"" >> ~/.Rprofile
     done        
     echo "   options(repos=r)" >> ~/.Rprofile
     echo "})" >> ~/.Rprofile
