@@ -7,10 +7,12 @@ set -e
 # Or ratherm set it for a lot noisier output
 # set -x
 
-CRAN=${CRAN:-"https://cran.rstudio.com"}
+CRAN=${CRAN:-"https://cloud.r-project.org"}
 BIOC=${BIOC:-"https://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
+
+R_VERSION=${R_VERSION:-"3.5"}
 
 ## Possible drat repos, unset by default
 DRAT_REPOS=${DRAT_REPOS:-""}
@@ -46,6 +48,15 @@ Bootstrap() {
         exit 1
     fi
 
+    if [[ "3.5" == "${R_VERSION}" ]]; then
+        echo "Using R 3.5.*"
+    elif [[ "3.4" == "${R_VERSION}" ]]; then
+        echo "Using R 3.4.*"
+    else
+        echo "Unknown R_VERSION: ${R_VERSION}"
+        exit 1
+    fi
+    
     if ! (test -e .Rbuildignore && grep -q 'travis-tool' .Rbuildignore); then
         echo '^travis-tool\.sh$' >>.Rbuildignore
     fi
@@ -84,12 +95,21 @@ InstallPandoc() {
 
 BootstrapLinux() {
     # Set up our CRAN mirror.
-    sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)/"
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+    if [[ "${R_VERSION}" == "3.5" ]]; then
+        sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
+    elif [[ "${R_VERSION}" == "3.4" ]]; then
+        sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)/"
+    fi
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x51716619e084dab9
 
     # Add marutter's c2d4u repository.
-    sudo add-apt-repository -y "ppa:marutter/rrutter"
-    sudo add-apt-repository -y "ppa:marutter/c2d4u"
+    if [[ "${R_VERSION}" == "3.5" ]]; then
+        sudo add-apt-repository -y "ppa:marutter/rrutter3.5"
+        sudo add-apt-repository -y "ppa:marutter/c2d4u3.5"
+    elif [[ "${R_VERSION}" == "3.4" ]]; then
+        sudo add-apt-repository -y "ppa:marutter/rrutter"
+        sudo add-apt-repository -y "ppa:marutter/c2d4u"
+    fi
 
     # Update after adding all repositories.  Retry several times to work around
     # flaky connection to Launchpad PPAs.
@@ -107,6 +127,9 @@ BootstrapLinux() {
 
     # Process options
     BootstrapLinuxOptions
+
+    # Report version
+    Rscript -e 'sessionInfo()'
 }
 
 BootstrapLinuxOptions() {
@@ -356,6 +379,12 @@ COMMAND=$1
 #https://github.com/craigcitro/r-travis/wiki/Porting-to-native-R-support-in-Travis
 #for information on porting to native R support in Travis.\033[0m"
 #echo "Running command: ${COMMAND}"
+echo ""
+echo "r-travis now defaults to using R 3.5.1. But you can easily revert"
+echo "back to R 3.4.4 by setting R_VERSION to \"3.4\" in your .travis.yml"
+echo ""
+echo "Current value: ${R_VERSION}"
+echo ""
 shift
 case $COMMAND in
     ##
