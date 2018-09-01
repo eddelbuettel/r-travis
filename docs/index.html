@@ -65,15 +65,24 @@
         <a href="https://github.com/eddelbuettel/rquantlib/blob/master/.travis.yml">RQuantLib</a>
 	show the interesting use case of relying on the <emph>external Launchpad PPA</emph> repository. This way
         we can use pre-built <code>.deb</code> packages which would either take <emph>approximately forever</emph> to
-        built such as QuantLib, or can equally well load a set of small <code>r-cran-*</code> packages not (yet?)
-        provided by Michael Rutter in his excellent c2d4u repository.
-
+        built such as QuantLib, or can equally well load from the set of
+        approximately 3000 <code>r-cran-*</code> packages provided by Michael Rutter in his excellent c2d4u repository.
 
         <p></p>
 
+        R 3.5 and R 3.4 are supported, with the default now being R 3.5.*.
+        You can fall back to using R 3.4 by setting `R_VERSION="3.4"` as an
+        environment variable in your `.travis.yml`.  You can also use build matrix
+        of two R versions as shown in [this `.travis.yml`
+        file](https://github.com/eddelbuettel/rcppannoy/blob/master/.travis.yml). 
+
+        <h4>History</h4>
+
+        This project started in August 2016 as a continuation of the initial
+        `r-travis` project, and has been updated throughout 2017 and 2018.
+
         <quote>
         Dirk Eddelbuettel<br>
-        August 2016
         </quote>
         
       </div>
