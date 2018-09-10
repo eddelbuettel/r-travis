@@ -100,8 +100,8 @@ BootstrapLinux() {
     elif [[ "${R_VERSION}" == "3.4" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)/"
     fi
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x51716619e084dab9
-
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    
     # Add marutter's c2d4u repository.
     if [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository -y "ppa:marutter/rrutter3.5"
