@@ -30,7 +30,7 @@ PANDOC_URL="https://s3.amazonaws.com/rstudio-buildtools/pandoc-${PANDOC_VERSION}
 PATH="${PATH}:/usr/texbin"
 
 R_BUILD_ARGS=${R_BUILD_ARGS-"--no-build-vignettes --no-manual"}
-R_CHECK_ARGS=${R_CHECK_ARGS-"--no-build-vignettes --no-manual --as-cran"}
+R_CHECK_ARGS=${R_CHECK_ARGS-"--no-vignettes --no-manual --as-cran"}
 R_CHECK_INSTALL_ARGS=${R_CHECK_INSTALL_ARGS-"--install-args=--install-tests"}
 
 R_USE_BIOC_CMDS="source('${BIOC}');"\
@@ -56,7 +56,7 @@ Bootstrap() {
         echo "Unknown R_VERSION: ${R_VERSION}"
         exit 1
     fi
-    
+
     if ! (test -e .Rbuildignore && grep -q 'travis-tool' .Rbuildignore); then
         echo '^travis-tool\.sh$' >>.Rbuildignore
     fi
@@ -74,9 +74,9 @@ SetRepos() {
     echo "local({" >> ~/.Rprofile
     echo "   r <- getOption(\"repos\");" >> ~/.Rprofile
     echo "   r[\"CRAN\"] <- \"${CRAN}\"" >> ~/.Rprofile
-    for d in ${DRAT_REPOS}; do 
+    for d in ${DRAT_REPOS}; do
         echo "   r[\"${d}\"] <- \"https://${d}.github.io/drat\"" >> ~/.Rprofile
-    done        
+    done
     echo "   options(repos=r)" >> ~/.Rprofile
     echo "})" >> ~/.Rprofile
 }
@@ -100,7 +100,7 @@ BootstrapLinux() {
     elif [[ "${R_VERSION}" == "3.4" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)/"
     fi
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0x51716619e084dab9
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 
     # Add marutter's c2d4u repository.
     if [[ "${R_VERSION}" == "3.5" ]]; then
@@ -313,7 +313,7 @@ Coverage() {
     echo "Running Code Coverage analysis via the covr package"
 
     ## assumes that the Rutter PPAs are in fact known, which is a given here
-    AptGetInstall r-cran-covr        
+    AptGetInstall r-cran-covr
 
     Rscript -e "covr::codecov()"
 }
@@ -380,10 +380,11 @@ COMMAND=$1
 #for information on porting to native R support in Travis.\033[0m"
 #echo "Running command: ${COMMAND}"
 echo ""
-echo "r-travis now defaults to using R 3.5.1. But you can easily revert"
-echo "back to R 3.4.4 by setting R_VERSION to \"3.4\" in your .travis.yml"
+echo "r-travis defaults to using the most current R version based on with the \"3.5\" API introduced by R 3.5.0."
+echo "But you can revert back to R 3.4.4 by setting R_VERSION to \"3.4\" in your .travis.yml but the PPA may well"
+echo "be out of sync with CRAN by now.  We anticipate another transition for the next R version in April 2020."
 echo ""
-echo "Current value: ${R_VERSION}"
+echo "Current value of the R API variable: ${R_VERSION}"
 echo ""
 shift
 case $COMMAND in
