@@ -49,10 +49,13 @@ Bootstrap() {
         exit 1
     fi
 
-    if [[ "3.5" == "${R_VERSION}" ]]; then
+    if [[ "4.0" == "${R_VERSION}" ]]; then
+        echo "Using R 4.0.*"
+    elif [[ "3.5" == "${R_VERSION}" ]]; then
         echo "Using R 3.5.*"
     elif [[ "3.4" == "${R_VERSION}" ]]; then
-        echo "Using R 3.4.*"
+        echo "Using R 3.4 is no longer supported."
+        exit 1
     else
         echo "Unknown R_VERSION: ${R_VERSION}"
         exit 1
@@ -96,7 +99,9 @@ InstallPandoc() {
 
 BootstrapLinux() {
     # Set up our CRAN mirror.
-    if [[ "${R_VERSION}" == "3.5" ]]; then
+    if [[ "${R_VERSION}" == "4.0" ]]; then
+        sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+    elif [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
     elif [[ "${R_VERSION}" == "3.4" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)/"
@@ -104,12 +109,17 @@ BootstrapLinux() {
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 
     # Add marutter's c2d4u repository.
-    if [[ "${R_VERSION}" == "3.5" ]]; then
+    if [[ "${R_VERSION}" == "4.0" ]]; then
+        sudo add-apt-repository -y "ppa:marutter/rrutter4.0"
+        sudo add-apt-repository -y "ppa:c2d4u.team/c2d4u4.0+"
+    elif [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository -y "ppa:marutter/rrutter3.5"
         sudo add-apt-repository -y "ppa:marutter/c2d4u3.5"
     elif [[ "${R_VERSION}" == "3.4" ]]; then
-        sudo add-apt-repository -y "ppa:marutter/rrutter"
-        sudo add-apt-repository -y "ppa:marutter/c2d4u"
+        exit "R 3.4 is too old."
+        exit 1
+        #sudo add-apt-repository -y "ppa:marutter/rrutter"
+        #sudo add-apt-repository -y "ppa:marutter/c2d4u"
     fi
 
     # Update after adding all repositories.  Retry several times to work around
@@ -381,9 +391,11 @@ COMMAND=$1
 #for information on porting to native R support in Travis.\033[0m"
 #echo "Running command: ${COMMAND}"
 echo ""
-echo "r-travis defaults to using the most current R version based on with the \"3.5\" API introduced by R 3.5.0."
-echo "But you can revert back to R 3.4.4 by setting R_VERSION to \"3.4\" in your .travis.yml but the PPA may well"
-echo "be out of sync with CRAN by now.  We anticipate another transition for the next R version in April 2020."
+echo "r-travis defaults to using the most current R version, currently the \"4.0\" API introduced by R 4.0.0."
+echo ""
+echo "But one can select another version explicitly by setting R_VERSION to \"3.5\" in .travis.yml."
+echo "Note that the corresponding PPAs will selected based on this variable but the distribution"
+echo "in the .travis.yml matters as well as not all distros have r-3.5 and r-4.0 repos."
 echo ""
 echo "Current value of the R API variable: ${R_VERSION}"
 echo ""
