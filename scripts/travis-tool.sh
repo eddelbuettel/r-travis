@@ -6,8 +6,8 @@ set -e
 # Comment out this line for quieter output:
 set -x
 
-CRAN=${CRAN:-"http://cran.rstudio.com"}
-BIOC=${BIOC:-"http://bioconductor.org/biocLite.R"}
+CRAN=${CRAN:-"https://cloud.r-project.org"}
+BIOC=${BIOC:-"https://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
