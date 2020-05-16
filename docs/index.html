@@ -17,7 +17,7 @@
   <div class="row"> &nbsp; </div>
   <div class="container">
     <div class="row">
-      <div class="col-md-5">
+      <div class="col-md-7">
         
         <h4>About</h4>
 
@@ -27,61 +27,44 @@
 
         <p></p>
 
-        <h4>Why Not the New Travis R Setup?</h4>
+        <h4>Why Not the New Travis R Setup? Why not GitHub Actions?</h4>
 
-        Given all our work around <a href="https://github.com/rocker-org/rocker">Rocker</a> (the container for R blessed by
-        Docker itself) where I am one-half of the project too, you'd expect me to be fully in support of container-based
-        Travis. And you'd be right---I am. Containers rock.
-
-        <p></p>
-        
-        But I am just not all that excited that we cannot bring our own containers, or use <code>sudo</code>, with
-        Travis.  I have been building Debian packages since 1995 and simply <em>love, love, love</em> the fact that the
-        (initial) Travis setup allowed us to <code>apt-get</code> packages in as needed.  And with couple dozen
-        repositories I have around R, I needed that multiple times.
+        Given all our work around <a href="https://github.com/rocker-org/rocker">Rocker</a> (the container for R blessed
+        by Docker itself) where I am one-half of the project too, you'd expect me to be fully in support of a
+        container-based Travis. And you'd be right---I am. Containers rock.  And now we can use containers with Travis.
 
         <p></p>
 
-        Plus I also like the fact that I am essentially in control of my own script here, as you could simply by forking
-        this repo and sourcing from it.
+        I also like the fact that I am essentially in control of my own script here, as you could simply by forking this
+        repo and sourcing from it.
 
         <h4>Usage</h4>
 
-        As of right now, only a few repository of mine have switched. You can see the corresponding files for
-        <a href="https://github.com/eddelbuettel/drat/blob/master/.travis.yml">drat</a>,
-        <a href="https://github.com/eddelbuettel/digest/blob/master/.travis.yml">digest</a>,
-        <a href="https://github.com/eddelbuettel/gaussfacts/blob/master/.travis.yml">gaussfacts</a>,
-        <a href="https://github.com/eddelbuettel/littler/blob/master/.travis.yml">littler</a>,
-        <a href="https://github.com/eddelbuettel/rcppstreams/blob/master/.travis.yml">RcppStreams</a>,
-        <a href="https://github.com/eddelbuettel/rmsfact/blob/master/.travis.yml">rmsfact</a>, and
-        <a href="https://github.com/eddelbuettel/rquantlib/blob/master/.travis.yml">RQuantLib</a>. 
-        I simply switched to sourcing from this repository's website, and also renamed to a shorter,
-        simpler <code>run.sh</code>. I intend to switch more repositories to this over the coming weeks.
-
+        By now, all of my repositories have switched (and some moved on to using just Travis with Docker), as have
+        repositories of other users. You can search for these within the <a href="https://github.com/cran">GitHub CRAN
+        repo</a> by searching for <code>eddelbuettel/r-travis</code>.
+        One of the key advantages is that you can use a) the Rutter PPAs with over 4000 compiled <code>r-cran-*</code>
+        packages, and if you wish, can add your own packages via PPAs or else pull in from other matching PPAs.
         <p></p>
 
-        Among these examples, 
-        <a href="https://github.com/eddelbuettel/littler/blob/master/.travis.yml">littler</a>, and
-        <a href="https://github.com/eddelbuettel/rquantlib/blob/master/.travis.yml">RQuantLib</a>
-	show the interesting use case of relying on the <emph>external Launchpad PPA</emph> repository. This way
-        we can use pre-built <code>.deb</code> packages which would either take <emph>approximately forever</emph> to
-        built such as QuantLib, or can equally well load from the set of
-        approximately 3000 <code>r-cran-*</code> packages provided by Michael Rutter in his excellent c2d4u repository.
+        <h4>Status</h4>
 
-        <p></p>
+        We have switched to supporting R 4.0.0 as well as the previous R 3.5.* API used up to R 3.6.3. As of mid-May
+        r-3.5 is still the default.  You can use a matrix of both versions too:
 
-        R 3.5 and R 3.4 are supported, with the default now being R 3.5.*.
-        You can fall back to using R 3.4 by setting
-        <code>R_VERSION="3.4"</code> as an environment variable in your
-        <code>.travis.yml</code>.  You can also use build matrix of two R
-        versions as shown in <a
-        href="https://github.com/eddelbuettel/rcppannoy/blob/master/.travis.yml">this
-        <code>.travis.yml</code>file</a>.
-
+        <pre>
+	jobs:
+	  include:
+	    - name: r-3.5
+	      env: R_VERSION="3.5"
+	    - name: r-4.0
+	      env: R_VERSION="4.0"
+        </pre>
+        
         <h4>History</h4>
 
-        This project started in August 2016 as a continuation of the initial
-        `r-travis` project, and has been updated throughout 2017 and 2018.
+        This project started in August 2016 as a continuation of the initial `r-travis` project, and has been actively
+        used and maintained since. In May 2020 is was updated to R 4.0.0
 
         <p></p>
 
@@ -90,7 +73,7 @@
         </quote>
         
       </div>
-      <div class="col-md-6">
+      <div class="col-md-5">
         <center>
         <img src="https://avatars3.githubusercontent.com/u/11597821?v=3&amp;s=400"  />
         </center>

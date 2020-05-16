@@ -98,15 +98,18 @@ InstallPandoc() {
 }
 
 BootstrapLinux() {
-    # Set up our CRAN mirror.
+    ## Set up our CRAN mirror.
+    ## Get the key
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+    ## Add the repo
     if [[ "${R_VERSION}" == "4.0" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
     elif [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
     elif [[ "${R_VERSION}" == "3.4" ]]; then
-        sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)/"
+        echo "Using R 3.4 is no longer supported."
+        exit 1
     fi
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 
     # Add marutter's c2d4u repository.
     if [[ "${R_VERSION}" == "4.0" ]]; then
@@ -391,11 +394,14 @@ COMMAND=$1
 #for information on porting to native R support in Travis.\033[0m"
 #echo "Running command: ${COMMAND}"
 echo ""
-echo "r-travis defaults to using the most current R version, currently the \"4.0\" API introduced by R 4.0.0."
+echo "r-travis defaults to using the most current R version, currently the \"4.0\" API"
+echo "introduced by R 4.0.0."
 echo ""
-echo "But one can select another version explicitly by setting R_VERSION to \"3.5\" in .travis.yml."
-echo "Note that the corresponding PPAs will selected based on this variable but the distribution"
-echo "in the .travis.yml matters as well as not all distros have r-3.5 and r-4.0 repos."
+echo "But one can select another version explicitly by setting R_VERSION to \"3.5\""
+echo "in .travis.yml. Note that the corresponding PPAs will selected based on this"
+echo "variable but the distribution in the .travis.yml matters as well as not all"
+echo "releases distros have r-3.5 and r-4.0 repos. See the bin/linux/ubuntu/ dir on"
+echo "the CRAN mirrors if in doubt."
 echo ""
 echo "Current value of the R API variable: ${R_VERSION}"
 echo ""
