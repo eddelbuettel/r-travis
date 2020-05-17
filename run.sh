@@ -137,7 +137,8 @@ BootstrapLinux() {
     # Install an R development environment. qpdf is also needed for
     # --as-cran checks:
     #   https://stat.ethz.ch/pipermail/r-help//2012-September/335676.html
-    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf
+    # May 2020: we also need devscripts for checkbashism
+    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts
 
     # Change permissions for /usr/local/lib/R/site-library
     # This should really be via 'staff adduser travis staff'
