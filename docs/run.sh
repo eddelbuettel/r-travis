@@ -103,11 +103,12 @@ BootstrapLinux() {
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
     ## Add the repo
     if [[ "${R_VERSION}" == "4.0" ]]; then
-        sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
         ## need pinning to ensure repo sorts higher
-        echo "Package: *" > /etc/apt/preferences.d/c2d4u-pin
-        echo "Pin: release o=LP-PPA-c2d4u.team-c2d4u4.0+" >> /etc/apt/preferences.d/c2d4u-pin
-        echo "Pin-Priority: 750" >> /etc/apt/preferences.d/c2d4u-pin
+        echo "Package: *" | sudo tee /etc/apt/preferences.d/c2d4u-pin
+        echo "Pin: release o=LP-PPA-c2d4u.team-c2d4u4.0+" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin
+        echo "Pin-Priority: 750" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin
+        ## now add repo (and update index)
+        sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
     elif [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran35/"
     elif [[ "${R_VERSION}" == "3.4" ]]; then
