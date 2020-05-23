@@ -12,6 +12,7 @@ BIOC=${BIOC:-"https://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
+## Default version: Still use 3.5 to be conservative
 R_VERSION=${R_VERSION:-"3.5"}
 
 ## Possible drat repos, unset by default
@@ -409,7 +410,8 @@ echo "variable but the distribution in the .travis.yml matters as well as not al
 echo "releases distros have r-3.5 and r-4.0 repos. See the bin/linux/ubuntu/ dir on"
 echo "the CRAN mirrors if in doubt."
 echo ""
-echo "Current value of the R API variable: ${R_VERSION}"
+echo "Current value of the R API variable from .travis.yml: ${R_VERSION}"
+echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
 echo ""
 shift
 case $COMMAND in
