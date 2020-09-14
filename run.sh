@@ -12,8 +12,8 @@ BIOC=${BIOC:-"https://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
-## Default version: Still use 3.5 to be conservative
-R_VERSION=${R_VERSION:-"3.5"}
+## Default version: Now use 4.0, and 3.5 should still work
+R_VERSION=${R_VERSION:-"4.0"}
 
 ## Possible drat repos, unset by default
 DRAT_REPOS=${DRAT_REPOS:-""}
