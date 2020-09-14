@@ -142,14 +142,14 @@ BootstrapLinux() {
     # Sep 2020: add bspm, littler, docopt
     Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-littler r-cran-docopt
 
-    cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
+    sudo cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
     ## for now also from littler from GH
-    install.r remotes
-    installGithub.r eddelbuettel/littler
-    cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
+    sudo install.r remotes
+    sudo installGithub.r eddelbuettel/littler
+    sudo cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
 
     # Default to no recommends
-    echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90local-no-recommends
+    echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/90local-no-recommends
 
     # Change permissions for /usr/local/lib/R/site-library
     # This should really be via 'staff adduser travis staff'
@@ -178,7 +178,7 @@ BootstrapLinuxOptions() {
         InstallPandoc 'linux/debian/x86_64'
     fi
     if [[ -n "${USE_BSPM}" ]]; then
-        echo "bspm::enable()" >> /etc/R/Rprofile.site
+        echo "bspm::enable()" | sudo tee --append /etc/R/Rprofile.site
     fi
 
 }
