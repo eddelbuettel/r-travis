@@ -220,7 +220,7 @@ AptGetInstall() {
     fi
 
     echo "Installing apt package(s) $@"
-    Retry sudo apt-get -y --allow-unauthenticated install "$@"
+    Retry sudo apt-get -y --no-install-recommends --allow-unauthenticated install "$@"
 }
 
 DpkgCurlInstall() {
