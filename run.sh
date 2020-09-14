@@ -139,7 +139,17 @@ BootstrapLinux() {
     # --as-cran checks:
     #   https://stat.ethz.ch/pipermail/r-help//2012-September/335676.html
     # May 2020: we also need devscripts for checkbashism
-    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts
+    # Sep 2020: add bspm, littler, docopt
+    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-littler r-cran-docopt
+
+    cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
+    ## for now also from littler from GH
+    install.r remotes
+    installGithub.r eddelbuettel/littler
+    cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
+
+    # Default to no recommends
+    echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90local-no-recommends
 
     # Change permissions for /usr/local/lib/R/site-library
     # This should really be via 'staff adduser travis staff'
@@ -167,6 +177,10 @@ BootstrapLinuxOptions() {
     if [[ -n "$BOOTSTRAP_PANDOC" ]]; then
         InstallPandoc 'linux/debian/x86_64'
     fi
+    if [[ -n "${USE_BSPM}" ]]; then
+        echo "bspm::enable()" >> /etc/R/Rprofile.site
+    fi
+
 }
 
 BootstrapMac() {
