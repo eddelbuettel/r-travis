@@ -73,6 +73,12 @@ Bootstrap() {
     fi
 
     SetRepos
+
+    # Make sure unit test package (among testthat, tinytest, RUnit) installed
+    EnsureUnittestRunner
+
+    # Report version
+    Rscript -e 'sessionInfo()'
 }
 
 SetRepos() {
@@ -140,13 +146,13 @@ BootstrapLinux() {
     #   https://stat.ethz.ch/pipermail/r-help//2012-September/335676.html
     # May 2020: we also need devscripts for checkbashism
     # Sep 2020: add bspm, littler, docopt
-    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-littler r-cran-docopt
+    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-docopt r-cran-littler r-cran-remotes
 
     sudo cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
     ## for now also from littler from GH
-    sudo install.r remotes
-    sudo installGithub.r eddelbuettel/littler
-    sudo cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
+    #sudo install.r remotes
+    #sudo installGithub.r eddelbuettel/littler
+    #sudo cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
 
     # Default to no recommends
     echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/90local-no-recommends
@@ -158,9 +164,6 @@ BootstrapLinux() {
 
     # Process options
     BootstrapLinuxOptions
-
-    # Report version
-    Rscript -e 'sessionInfo()'
 }
 
 BootstrapLinuxOptions() {
@@ -216,9 +219,22 @@ BootstrapMacOptions() {
 }
 
 EnsureDevtools() {
-    if ! Rscript -e 'if (!("devtools" %in% rownames(installed.packages()))) q(status=1)' ; then
-        # Install devtools and testthat.
-        RBinaryInstall devtools testthat
+    ## deprecated 2020-Sep
+    echo "Deprecated"
+    #if ! Rscript -e 'if (!("devtools" %in% rownames(installed.packages()))) q(status=1)' ; then
+    #    # Install devtools and testthat.
+    #    RBinaryInstall devtools testthat
+    #fi
+}
+
+EnsureUnittestRunner() {
+    sudo Rscript -e 'Sug <- unname(read.dcf(file="DESCRIPTION")[1,"Suggests"]); install.packages(do.call(c, sapply(c("testthat", "tinytest", "RUnit"), function(p, Sug) if (grepl(p, Sug)) p else NULL, Sug, USE.NAMES=FALSE)))'
+}
+
+InstallIfNotYetInstalled() {
+    res=$(Rscript -e 'if (requireNamespace(commandArgs(TRUE), quietly=TRUE)) cat("YES") else cat("NO")' "$1")
+    if [[ "${res}" != "YES" ]]; then
+        sudo Rscript -e 'install.packages(commandArgs(TRUE))' "$1"
     fi
 }
 
@@ -264,7 +280,7 @@ RInstall() {
     fi
 
     echo "Installing R package(s): $@"
-    Rscript -e 'install.packages(commandArgs(TRUE))' "$@"
+    sudo Rscript -e 'install.packages(commandArgs(TRUE))' "$@"
 }
 
 BiocInstall() {
@@ -297,21 +313,25 @@ RBinaryInstall() {
 }
 
 InstallGithub() {
-    EnsureDevtools
+    #EnsureDevtools
 
-    echo "Installing GitHub packages: $@"
+    #echo "Installing GitHub packages: $@"
     # Install the package.
-    Rscript -e 'library(devtools); library(methods); install_github(commandArgs(TRUE), build_vignettes = FALSE)' "$@"
+    #Rscript -e 'library(devtools); library(methods); install_github(commandArgs(TRUE), build_vignettes = FALSE)' "$@"
+    sudo Rscript -e 'remotes::install_github(commandArgs(TRUE))' "$@"
 }
 
 InstallDeps() {
-    EnsureDevtools
-    Rscript -e 'library(devtools); library(methods); install_deps(dependencies = TRUE)'
+    #EnsureDevtools
+    #Rscript -e 'library(devtools); library(methods); install_deps(dependencies = TRUE)'
+    sudo Rscript -e 'remotes::install_deps(".")'
 }
 
 InstallBiocDeps() {
-    EnsureDevtools
-    Rscript -e "${R_USE_BIOC_CMDS}"' library(devtools); install_deps(dependencies = TRUE)'
+    ## deprecated 2020-Sep
+    echo "Deprecated"
+    #EnsureDevtools
+    #Rscript -e "${R_USE_BIOC_CMDS}"' library(devtools); install_deps(dependencies = TRUE)'
 }
 
 DumpSysinfo() {
@@ -372,10 +392,10 @@ RunTests() {
     _R_CHECK_CRAN_INCOMING_=${_R_CHECK_CRAN_INCOMING_} R CMD check "${FILE}" ${R_CHECK_ARGS} ${R_CHECK_INSTALL_ARGS}
 
     # Check reverse dependencies
-    if [[ -n "$R_CHECK_REVDEP" ]]; then
-        echo "Checking reverse dependencies"
-        Rscript -e 'library(devtools); checkOutput <- unlist(revdep_check(as.package(".")$package));if (!is.null(checkOutput)) {print(data.frame(pkg = names(checkOutput), error = checkOutput));for(i in seq_along(checkOutput)){;cat("\n", names(checkOutput)[i], " Check Output:\n  ", paste(readLines(regmatches(checkOutput[i], regexec("/.*\\.out", checkOutput[i]))[[1]]), collapse = "\n  ", sep = ""), "\n", sep = "")};q(status = 1, save = "no")}'
-    fi
+    #if [[ -n "$R_CHECK_REVDEP" ]]; then
+    #    echo "Checking reverse dependencies"
+    #    Rscript -e 'library(devtools); checkOutput <- unlist(revdep_check(as.package(".")$package));if (!is.null(checkOutput)) {print(data.frame(pkg = names(checkOutput), error = checkOutput));for(i in seq_along(checkOutput)){;cat("\n", names(checkOutput)[i], " Check Output:\n  ", paste(readLines(regmatches(checkOutput[i], regexec("/.*\\.out", checkOutput[i]))[[1]]), collapse = "\n  ", sep = ""), "\n", sep = "")};q(status = 1, save = "no")}'
+    #fi
 
     if [[ -n "${WARNINGS_ARE_ERRORS}" ]]; then
         if DumpLogsByExtension "00check.log" | grep -q WARNING; then
