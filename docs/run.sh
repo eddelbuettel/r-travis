@@ -18,6 +18,10 @@ R_VERSION=${R_VERSION:-"4.0"}
 ## Possible drat repos, unset by default
 DRAT_REPOS=${DRAT_REPOS:-""}
 
+## Possible BSPM use, default to false
+USE_BSPM=${USE_BSPM:-"FALSE"}
+
+
 PANDOC_VERSION='1.13.1'
 PANDOC_DIR="${HOME}/opt/pandoc"
 PANDOC_URL="https://s3.amazonaws.com/rstudio-buildtools/pandoc-${PANDOC_VERSION}.zip"
@@ -111,9 +115,9 @@ BootstrapLinux() {
     ## Add the repo
     if [[ "${R_VERSION}" == "4.0" ]]; then
         ## need pinning to ensure repo sorts higher
-        echo "Package: *" | sudo tee /etc/apt/preferences.d/c2d4u-pin
-        echo "Pin: release o=LP-PPA-c2d4u.team-c2d4u4.0+" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin
-        echo "Pin-Priority: 750" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin
+        echo "Package: *" | sudo tee /etc/apt/preferences.d/c2d4u-pin >/dev/null
+        echo "Pin: release o=LP-PPA-c2d4u.team-c2d4u4.0+" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin >/dev/null
+        echo "Pin-Priority: 750" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin >/dev/null
         ## now add repo (and update index)
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
     elif [[ "${R_VERSION}" == "3.5" ]]; then
@@ -155,7 +159,7 @@ BootstrapLinux() {
     #sudo cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
 
     # Default to no recommends
-    echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/90local-no-recommends
+    echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/90local-no-recommends >/dev/null
 
     # Change permissions for /usr/local/lib/R/site-library
     # This should really be via 'staff adduser travis staff'
@@ -180,10 +184,9 @@ BootstrapLinuxOptions() {
     if [[ -n "$BOOTSTRAP_PANDOC" ]]; then
         InstallPandoc 'linux/debian/x86_64'
     fi
-    if [[ -n "${USE_BSPM}" ]]; then
-        echo "bspm::enable()" | sudo tee --append /etc/R/Rprofile.site
+    if [[ "${USE_BSPM}" != "FALSE" ]]; then
+        echo "bspm::enable()" | sudo tee --append /etc/R/Rprofile.site >/dev/null
     fi
-
 }
 
 BootstrapMac() {
@@ -228,7 +231,7 @@ EnsureDevtools() {
 }
 
 EnsureUnittestRunner() {
-    sudo Rscript -e 'Sug <- unname(read.dcf(file="DESCRIPTION")[1,"Suggests"]); install.packages(do.call(c, sapply(c("testthat", "tinytest", "RUnit"), function(p, Sug) if (grepl(p, Sug)) p else NULL, Sug, USE.NAMES=FALSE)))'
+    sudo Rscript -e 'sug <- unname(read.dcf(file="DESCRIPTION")[1,"Suggests"]); pkg <- do.call(c, sapply(c("testthat", "tinytestA", "RUnit"), function(p, sug) if (grepl(p, sug)) p else NULL, sug, USE.NAMES=FALSE)); if (!is.null(pkg)) install.packages(pkg)'
 }
 
 InstallIfNotYetInstalled() {
@@ -325,6 +328,10 @@ InstallDeps() {
     #EnsureDevtools
     #Rscript -e 'library(devtools); library(methods); install_deps(dependencies = TRUE)'
     sudo Rscript -e 'remotes::install_deps(".")'
+}
+
+InstallDepsAndSuggests() {
+    sudo Rscript -e 'remotes::install_deps(".", dependencies=TRUE)'
 }
 
 InstallBiocDeps() {
@@ -489,14 +496,19 @@ case $COMMAND in
         RBinaryInstall "$@"
         ;;
     ##
-    ## Install a package from github sources (needs devtools)
+    ## Install a package from github sources
     "install_github"|"github_package")
         InstallGithub "$@"
         ;;
     ##
-    ## Install package dependencies from CRAN (needs devtools)
+    ## Install package dependencies from CRAN
     "install_deps")
         InstallDeps
+        ;;
+    ##
+    ## Install package dependencies and suggests from CRAN
+    "install_all")
+        InstallDepsAndSuggests
         ;;
     ##
     ## Install package dependencies from Bioconductor and CRAN (needs devtools)
