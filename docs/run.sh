@@ -12,11 +12,15 @@ BIOC=${BIOC:-"https://bioconductor.org/biocLite.R"}
 BIOC_USE_DEVEL=${BIOC_USE_DEVEL:-"TRUE"}
 OS=$(uname -s)
 
-## Default version: Still use 3.5 to be conservative
-R_VERSION=${R_VERSION:-"3.5"}
+## Default version: Now use 4.0, and 3.5 should still work
+R_VERSION=${R_VERSION:-"4.0"}
 
 ## Possible drat repos, unset by default
 DRAT_REPOS=${DRAT_REPOS:-""}
+
+## Possible BSPM use, default to false
+USE_BSPM=${USE_BSPM:-"FALSE"}
+
 
 PANDOC_VERSION='1.13.1'
 PANDOC_DIR="${HOME}/opt/pandoc"
@@ -41,6 +45,8 @@ R_USE_BIOC_CMDS="source('${BIOC}');"\
 " options(repos=biocinstallRepos());"
 
 Bootstrap() {
+    SetRepos
+
     if [[ "Darwin" == "${OS}" ]]; then
         BootstrapMac
     elif [[ "Linux" == "${OS}" ]]; then
@@ -72,7 +78,11 @@ Bootstrap() {
         echo '^travis_wait_.*\.log$' >> .Rbuildignore
     fi
 
-    SetRepos
+    # Make sure unit test package (among testthat, tinytest, RUnit) installed
+    EnsureUnittestRunner
+
+    # Report version
+    Rscript -e 'sessionInfo()'
 }
 
 SetRepos() {
@@ -105,9 +115,9 @@ BootstrapLinux() {
     ## Add the repo
     if [[ "${R_VERSION}" == "4.0" ]]; then
         ## need pinning to ensure repo sorts higher
-        echo "Package: *" | sudo tee /etc/apt/preferences.d/c2d4u-pin
-        echo "Pin: release o=LP-PPA-c2d4u.team-c2d4u4.0+" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin
-        echo "Pin-Priority: 750" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin
+        echo "Package: *" | sudo tee /etc/apt/preferences.d/c2d4u-pin >/dev/null
+        echo "Pin: release o=LP-PPA-c2d4u.team-c2d4u4.0+" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin >/dev/null
+        echo "Pin-Priority: 750" | sudo tee -a /etc/apt/preferences.d/c2d4u-pin >/dev/null
         ## now add repo (and update index)
         sudo add-apt-repository "deb ${CRAN}/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
     elif [[ "${R_VERSION}" == "3.5" ]]; then
@@ -139,7 +149,17 @@ BootstrapLinux() {
     # --as-cran checks:
     #   https://stat.ethz.ch/pipermail/r-help//2012-September/335676.html
     # May 2020: we also need devscripts for checkbashism
-    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts
+    # Sep 2020: add bspm, littler, docopt
+    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-docopt r-cran-littler r-cran-remotes
+
+    sudo cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
+    ## for now also from littler from GH
+    #sudo install.r remotes
+    #sudo installGithub.r eddelbuettel/littler
+    #sudo cp -ax /usr/local/lib/R/site-library/littler/examples/{check.r,install*.r} /usr/local/bin
+
+    # Default to no recommends
+    echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/90local-no-recommends >/dev/null
 
     # Change permissions for /usr/local/lib/R/site-library
     # This should really be via 'staff adduser travis staff'
@@ -148,9 +168,6 @@ BootstrapLinux() {
 
     # Process options
     BootstrapLinuxOptions
-
-    # Report version
-    Rscript -e 'sessionInfo()'
 }
 
 BootstrapLinuxOptions() {
@@ -167,6 +184,9 @@ BootstrapLinuxOptions() {
     if [[ -n "$BOOTSTRAP_PANDOC" ]]; then
         InstallPandoc 'linux/debian/x86_64'
     fi
+    if [[ "${USE_BSPM}" != "FALSE" ]]; then
+        echo "bspm::enable()" | sudo tee --append /etc/R/Rprofile.site >/dev/null
+    fi
 }
 
 BootstrapMac() {
@@ -179,6 +199,9 @@ BootstrapMac() {
 
     # Process options
     BootstrapMacOptions
+
+    # Default packages
+    sudo Rscript -e 'install.packages(c("docopt", "littler", "remotes"))'
 }
 
 BootstrapMacOptions() {
@@ -202,9 +225,22 @@ BootstrapMacOptions() {
 }
 
 EnsureDevtools() {
-    if ! Rscript -e 'if (!("devtools" %in% rownames(installed.packages()))) q(status=1)' ; then
-        # Install devtools and testthat.
-        RBinaryInstall devtools testthat
+    ## deprecated 2020-Sep
+    echo "Deprecated"
+    #if ! Rscript -e 'if (!("devtools" %in% rownames(installed.packages()))) q(status=1)' ; then
+    #    # Install devtools and testthat.
+    #    RBinaryInstall devtools testthat
+    #fi
+}
+
+EnsureUnittestRunner() {
+    sudo Rscript -e 'sug <- unname(read.dcf(file="DESCRIPTION")[1,"Suggests"]); pkg <- do.call(c, sapply(c("testthat", "tinytestA", "RUnit"), function(p, sug) if (grepl(p, sug)) p else NULL, sug, USE.NAMES=FALSE)); if (!is.null(pkg)) install.packages(pkg)'
+}
+
+InstallIfNotYetInstalled() {
+    res=$(Rscript -e 'if (requireNamespace(commandArgs(TRUE), quietly=TRUE)) cat("YES") else cat("NO")' "$1")
+    if [[ "${res}" != "YES" ]]; then
+        sudo Rscript -e 'install.packages(commandArgs(TRUE))' "$1"
     fi
 }
 
@@ -220,7 +256,7 @@ AptGetInstall() {
     fi
 
     echo "Installing apt package(s) $@"
-    Retry sudo apt-get -y --allow-unauthenticated install "$@"
+    Retry sudo apt-get -y --no-install-recommends --allow-unauthenticated install "$@"
 }
 
 DpkgCurlInstall() {
@@ -250,7 +286,7 @@ RInstall() {
     fi
 
     echo "Installing R package(s): $@"
-    Rscript -e 'install.packages(commandArgs(TRUE))' "$@"
+    sudo Rscript -e 'install.packages(commandArgs(TRUE))' "$@"
 }
 
 BiocInstall() {
@@ -283,21 +319,29 @@ RBinaryInstall() {
 }
 
 InstallGithub() {
-    EnsureDevtools
+    #EnsureDevtools
 
-    echo "Installing GitHub packages: $@"
+    #echo "Installing GitHub packages: $@"
     # Install the package.
-    Rscript -e 'library(devtools); library(methods); install_github(commandArgs(TRUE), build_vignettes = FALSE)' "$@"
+    #Rscript -e 'library(devtools); library(methods); install_github(commandArgs(TRUE), build_vignettes = FALSE)' "$@"
+    sudo Rscript -e 'remotes::install_github(commandArgs(TRUE))' "$@"
 }
 
 InstallDeps() {
-    EnsureDevtools
-    Rscript -e 'library(devtools); library(methods); install_deps(dependencies = TRUE)'
+    #EnsureDevtools
+    #Rscript -e 'library(devtools); library(methods); install_deps(dependencies = TRUE)'
+    sudo Rscript -e 'remotes::install_deps(".")'
+}
+
+InstallDepsAndSuggests() {
+    sudo Rscript -e 'remotes::install_deps(".", dependencies=TRUE)'
 }
 
 InstallBiocDeps() {
-    EnsureDevtools
-    Rscript -e "${R_USE_BIOC_CMDS}"' library(devtools); install_deps(dependencies = TRUE)'
+    ## deprecated 2020-Sep
+    echo "Deprecated"
+    #EnsureDevtools
+    #Rscript -e "${R_USE_BIOC_CMDS}"' library(devtools); install_deps(dependencies = TRUE)'
 }
 
 DumpSysinfo() {
@@ -358,10 +402,10 @@ RunTests() {
     _R_CHECK_CRAN_INCOMING_=${_R_CHECK_CRAN_INCOMING_} R CMD check "${FILE}" ${R_CHECK_ARGS} ${R_CHECK_INSTALL_ARGS}
 
     # Check reverse dependencies
-    if [[ -n "$R_CHECK_REVDEP" ]]; then
-        echo "Checking reverse dependencies"
-        Rscript -e 'library(devtools); checkOutput <- unlist(revdep_check(as.package(".")$package));if (!is.null(checkOutput)) {print(data.frame(pkg = names(checkOutput), error = checkOutput));for(i in seq_along(checkOutput)){;cat("\n", names(checkOutput)[i], " Check Output:\n  ", paste(readLines(regmatches(checkOutput[i], regexec("/.*\\.out", checkOutput[i]))[[1]]), collapse = "\n  ", sep = ""), "\n", sep = "")};q(status = 1, save = "no")}'
-    fi
+    #if [[ -n "$R_CHECK_REVDEP" ]]; then
+    #    echo "Checking reverse dependencies"
+    #    Rscript -e 'library(devtools); checkOutput <- unlist(revdep_check(as.package(".")$package));if (!is.null(checkOutput)) {print(data.frame(pkg = names(checkOutput), error = checkOutput));for(i in seq_along(checkOutput)){;cat("\n", names(checkOutput)[i], " Check Output:\n  ", paste(readLines(regmatches(checkOutput[i], regexec("/.*\\.out", checkOutput[i]))[[1]]), collapse = "\n  ", sep = ""), "\n", sep = "")};q(status = 1, save = "no")}'
+    #fi
 
     if [[ -n "${WARNINGS_ARE_ERRORS}" ]]; then
         if DumpLogsByExtension "00check.log" | grep -q WARNING; then
@@ -411,7 +455,9 @@ echo "releases distros have r-3.5 and r-4.0 repos. See the bin/linux/ubuntu/ dir
 echo "the CRAN mirrors if in doubt."
 echo ""
 echo "Current value of the R API variable from .travis.yml: ${R_VERSION}"
-echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
+if [[ "Linux" == "${OS}" ]]; then
+    echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
+fi
 echo ""
 shift
 case $COMMAND in
@@ -455,14 +501,19 @@ case $COMMAND in
         RBinaryInstall "$@"
         ;;
     ##
-    ## Install a package from github sources (needs devtools)
+    ## Install a package from github sources
     "install_github"|"github_package")
         InstallGithub "$@"
         ;;
     ##
-    ## Install package dependencies from CRAN (needs devtools)
+    ## Install package dependencies from CRAN
     "install_deps")
         InstallDeps
+        ;;
+    ##
+    ## Install package dependencies and suggests from CRAN
+    "install_all")
+        InstallDepsAndSuggests
         ;;
     ##
     ## Install package dependencies from Bioconductor and CRAN (needs devtools)
