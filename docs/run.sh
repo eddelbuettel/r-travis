@@ -45,6 +45,8 @@ R_USE_BIOC_CMDS="source('${BIOC}');"\
 " options(repos=biocinstallRepos());"
 
 Bootstrap() {
+    SetRepos
+
     if [[ "Darwin" == "${OS}" ]]; then
         BootstrapMac
     elif [[ "Linux" == "${OS}" ]]; then
@@ -75,8 +77,6 @@ Bootstrap() {
     if ! (test -e .Rbuildignore && grep -q 'travis_wait' .Rbuildignore); then
         echo '^travis_wait_.*\.log$' >> .Rbuildignore
     fi
-
-    SetRepos
 
     # Make sure unit test package (among testthat, tinytest, RUnit) installed
     EnsureUnittestRunner
@@ -199,6 +199,9 @@ BootstrapMac() {
 
     # Process options
     BootstrapMacOptions
+
+    # Default packages
+    sudo Rscript -e 'install.packages(c("docopt", "littler", "remotes"))'
 }
 
 BootstrapMacOptions() {
@@ -452,7 +455,9 @@ echo "releases distros have r-3.5 and r-4.0 repos. See the bin/linux/ubuntu/ dir
 echo "the CRAN mirrors if in doubt."
 echo ""
 echo "Current value of the R API variable from .travis.yml: ${R_VERSION}"
-echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
+if [[ "Linux" == "${OS}" ]]; then
+    echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
+fi
 echo ""
 shift
 case $COMMAND in
