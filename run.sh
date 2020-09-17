@@ -234,7 +234,7 @@ EnsureDevtools() {
 }
 
 EnsureUnittestRunner() {
-    sudo Rscript -e 'sug <- unname(read.dcf(file="DESCRIPTION")[1,"Suggests"]); pkg <- do.call(c, sapply(c("testthat", "tinytestA", "RUnit"), function(p, sug) if (grepl(p, sug)) p else NULL, sug, USE.NAMES=FALSE)); if (!is.null(pkg)) install.packages(pkg)'
+    sudo Rscript -e 'dcf <- read.dcf(file="DESCRIPTION")[1,]; if ("Suggests" %in% names(dcf)) { sug <- dcf[["Suggests"]]; pkg <- do.call(c, sapply(c("testthat", "tinytestA", "RUnit"), function(p, sug) if (grepl(p, sug)) p else NULL, sug, USE.NAMES=FALSE)); if (!is.null(pkg)) install.packages(pkg) }'
 }
 
 InstallIfNotYetInstalled() {
