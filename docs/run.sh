@@ -156,9 +156,11 @@ BootstrapLinux() {
         sudo add-apt-repository -y "ppa:marutter/rrutter4.0"
         sudo add-apt-repository -y "ppa:c2d4u.team/c2d4u4.0+"
         ## Added PPAs, if given
-        for ppa in "${ADDED_PPAS}"; do
-            sudo add-apt-repository -y "${ppa}"
-        done
+        if [[ "${ADDED_PPAS}" != "" ]]; then
+            for ppa in "${ADDED_PPAS}"; do
+                sudo add-apt-repository -y "${ppa}"
+            done
+        fi
     elif [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository -y "ppa:marutter/rrutter3.5"
         sudo add-apt-repository -y "ppa:marutter/c2d4u3.5"
@@ -260,7 +262,7 @@ EnsureDevtools() {
 }
 
 EnsureUnittestRunner() {
-    sudo Rscript -e 'dcf <- read.dcf(file="DESCRIPTION")[1,]; if ("Suggests" %in% names(dcf)) { sug <- dcf[["Suggests"]]; pkg <- do.call(c, sapply(c("testthat", "tinytestA", "RUnit"), function(p, sug) if (grepl(p, sug)) p else NULL, sug, USE.NAMES=FALSE)); if (!is.null(pkg)) install.packages(pkg) }'
+    sudo Rscript -e 'dcf <- read.dcf(file="DESCRIPTION")[1,]; if ("Suggests" %in% names(dcf)) { sug <- dcf[["Suggests"]]; pkg <- do.call(c, sapply(c("testthat", "tinytest", "RUnit"), function(p, sug) if (grepl(p, sug)) p else NULL, sug, USE.NAMES=FALSE)); if (!is.null(pkg)) install.packages(pkg) }'
 }
 
 InstallIfNotYetInstalled() {
