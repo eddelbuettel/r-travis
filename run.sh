@@ -22,9 +22,9 @@ DRAT_REPOS=${DRAT_REPOS:-""}
 USE_BSPM=${USE_BSPM:-"FALSE"}
 
 
-PANDOC_VERSION='1.13.1'
-PANDOC_DIR="${HOME}/opt/pandoc"
-PANDOC_URL="https://s3.amazonaws.com/rstudio-buildtools/pandoc-${PANDOC_VERSION}.zip"
+#PANDOC_VERSION='1.13.1'
+#PANDOC_DIR="${HOME}/opt/pandoc"
+#PANDOC_URL="https://s3.amazonaws.com/rstudio-buildtools/pandoc-${PANDOC_VERSION}.zip"
 
 # MacTeX installs in a new $PATH entry, and there's no way to force
 # the *parent* shell to source it from here. So we just manually add
@@ -43,6 +43,22 @@ R_USE_BIOC_CMDS="source('${BIOC}');"\
 " tryCatch(useDevel(${BIOC_USE_DEVEL}),"\
 " error=function(e) {if (!grepl('already in use', e$message)) {e}});"\
 " options(repos=biocinstallRepos());"
+
+ShowBanner() {
+    echo ""
+    echo "On Linux, r-travis defaults to using the most current R version, currently "
+    echo "the \"4.0\" API introduced by R 4.0.0."
+    echo ""
+    echo "But one can select another version explicitly by setting R_VERSION to \"3.5\""
+    echo "in .travis.yml. Note that the corresponding PPAs will selected based on this"
+    echo "variable but the distribution in the .travis.yml matters as well as not all"
+    echo "releases distros have r-3.5 and r-4.0 repos. See the bin/linux/ubuntu/ dir on"
+    echo "the CRAN mirrors if in doubt."
+    echo ""
+    echo "Current value of the R API variable (overrideable from .travis.yml): ${R_VERSION}"
+    echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
+    echo ""
+}
 
 Bootstrap() {
     SetRepos
@@ -97,18 +113,22 @@ SetRepos() {
 }
 
 InstallPandoc() {
-    local os_path="$1"
-    mkdir -p "${PANDOC_DIR}"
-    curl -o /tmp/pandoc-${PANDOC_VERSION}.zip ${PANDOC_URL}
-    unzip -j /tmp/pandoc-${PANDOC_VERSION}.zip "pandoc-${PANDOC_VERSION}/${os_path}/pandoc" -d "${PANDOC_DIR}"
-    chmod +x "${PANDOC_DIR}/pandoc"
-    sudo ln -s "${PANDOC_DIR}/pandoc" /usr/local/bin
-    unzip -j /tmp/pandoc-${PANDOC_VERSION}.zip "pandoc-${PANDOC_VERSION}/${os_path}/pandoc-citeproc" -d "${PANDOC_DIR}"
-    chmod +x "${PANDOC_DIR}/pandoc-citeproc"
-    sudo ln -s "${PANDOC_DIR}/pandoc-citeproc" /usr/local/bin
+    ## deprecated 2020-Sep
+    echo "Deprecated"
+    # local os_path="$1"
+    # mkdir -p "${PANDOC_DIR}"
+    # curl -o /tmp/pandoc-${PANDOC_VERSION}.zip ${PANDOC_URL}
+    # unzip -j /tmp/pandoc-${PANDOC_VERSION}.zip "pandoc-${PANDOC_VERSION}/${os_path}/pandoc" -d "${PANDOC_DIR}"
+    # chmod +x "${PANDOC_DIR}/pandoc"
+    # sudo ln -s "${PANDOC_DIR}/pandoc" /usr/local/bin
+    # unzip -j /tmp/pandoc-${PANDOC_VERSION}.zip "pandoc-${PANDOC_VERSION}/${os_path}/pandoc-citeproc" -d "${PANDOC_DIR}"
+    # chmod +x "${PANDOC_DIR}/pandoc-citeproc"
+    # sudo ln -s "${PANDOC_DIR}/pandoc-citeproc" /usr/local/bin
 }
 
 BootstrapLinux() {
+    ShowBanner
+
     ## Set up our CRAN mirror.
     ## Get the key
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
@@ -149,10 +169,10 @@ BootstrapLinux() {
     # --as-cran checks:
     #   https://stat.ethz.ch/pipermail/r-help//2012-September/335676.html
     # May 2020: we also need devscripts for checkbashism
-    # Sep 2020: add bspm, littler, docopt
-    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-docopt r-cran-littler r-cran-remotes
+    # Sep 2020: add bspm, remotes
+    Retry sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf devscripts r-cran-bspm r-cran-remotes
 
-    sudo cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
+    #sudo cp -ax /usr/lib/R/site-library/littler/examples/{build.r,check.r,install*.r,update.r} /usr/local/bin
     ## for now also from littler from GH
     #sudo install.r remotes
     #sudo installGithub.r eddelbuettel/littler
@@ -201,7 +221,7 @@ BootstrapMac() {
     BootstrapMacOptions
 
     # Default packages
-    sudo Rscript -e 'install.packages(c("docopt", "littler", "remotes"))'
+    sudo Rscript -e 'install.packages(c("remotes"))'
 }
 
 BootstrapMacOptions() {
@@ -444,21 +464,6 @@ COMMAND=$1
 #https://github.com/craigcitro/r-travis/wiki/Porting-to-native-R-support-in-Travis
 #for information on porting to native R support in Travis.\033[0m"
 #echo "Running command: ${COMMAND}"
-echo ""
-echo "r-travis defaults to using the most current R version, currently the \"4.0\" API"
-echo "introduced by R 4.0.0."
-echo ""
-echo "But one can select another version explicitly by setting R_VERSION to \"3.5\""
-echo "in .travis.yml. Note that the corresponding PPAs will selected based on this"
-echo "variable but the distribution in the .travis.yml matters as well as not all"
-echo "releases distros have r-3.5 and r-4.0 repos. See the bin/linux/ubuntu/ dir on"
-echo "the CRAN mirrors if in doubt."
-echo ""
-echo "Current value of the R API variable from .travis.yml: ${R_VERSION}"
-if [[ "Linux" == "${OS}" ]]; then
-    echo "Current Ubuntu distribution selected in .travis.yml : '$(lsb_release -ds)' aka '$(lsb_release -cs)'"
-fi
-echo ""
 shift
 case $COMMAND in
     ##
