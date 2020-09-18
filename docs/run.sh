@@ -15,11 +15,14 @@ OS=$(uname -s)
 ## Default version: Now use 4.0, and 3.5 should still work
 R_VERSION=${R_VERSION:-"4.0"}
 
-## Possible drat repos, unset by default
+## Optional drat repos, unset by default
 DRAT_REPOS=${DRAT_REPOS:-""}
 
-## Possible BSPM use, default to false
+## Optional BSPM use, default to false
 USE_BSPM=${USE_BSPM:-"FALSE"}
+
+## Optional additional PPAs, unset by default
+ADDED_PPAS=${ADDED_PPAS:-""}
 
 
 #PANDOC_VERSION='1.13.1'
@@ -149,16 +152,19 @@ BootstrapLinux() {
 
     # Add marutter's c2d4u repository.
     if [[ "${R_VERSION}" == "4.0" ]]; then
+        ## R 4.0 and c2d4u/4.0 variant
         sudo add-apt-repository -y "ppa:marutter/rrutter4.0"
         sudo add-apt-repository -y "ppa:c2d4u.team/c2d4u4.0+"
+        ## Added PPAs, if given
+        for ppa in "${ADDED_PPAS}"; do
+            sudo add-apt-repository -y "${ppa}"
+        done
     elif [[ "${R_VERSION}" == "3.5" ]]; then
         sudo add-apt-repository -y "ppa:marutter/rrutter3.5"
         sudo add-apt-repository -y "ppa:marutter/c2d4u3.5"
     elif [[ "${R_VERSION}" == "3.4" ]]; then
         exit "R 3.4 is too old."
         exit 1
-        #sudo add-apt-repository -y "ppa:marutter/rrutter"
-        #sudo add-apt-repository -y "ppa:marutter/c2d4u"
     fi
 
     # Update after adding all repositories.  Retry several times to work around
