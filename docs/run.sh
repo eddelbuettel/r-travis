@@ -201,7 +201,7 @@ BootstrapLinux() {
 BootstrapLinuxOptions() {
     if [[ -n "$BOOTSTRAP_LATEX" ]]; then
         # We add a backports PPA for more recent TeX packages.
-        sudo add-apt-repository -y "ppa:texlive-backports/ppa"
+        # sudo add-apt-repository -y "ppa:texlive-backports/ppa"
 
         Retry sudo apt-get install -y --no-install-recommends \
             texlive-base texlive-latex-base texlive-generic-recommended \
