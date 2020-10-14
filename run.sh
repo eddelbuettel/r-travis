@@ -204,10 +204,11 @@ BootstrapLinuxOptions() {
         # sudo add-apt-repository -y "ppa:texlive-backports/ppa"
 
         Retry sudo apt-get install -y --no-install-recommends \
-            texlive-base texlive-latex-base texlive-generic-recommended \
+            texlive-base texlive-latex-base \
             texlive-fonts-recommended texlive-fonts-extra \
             texlive-extra-utils texlive-latex-recommended texlive-latex-extra \
             texinfo lmodern
+        # no longer exists: texlive-generic-recommended
     fi
     if [[ -n "$BOOTSTRAP_PANDOC" ]]; then
         InstallPandoc 'linux/debian/x86_64'
