@@ -1,7 +1,7 @@
 # .travis.yml for r-travis.
 #
 # If you're looking to use r-travis with your project, do not use this file.
-# Use a .travis.yml using it.
+# There are simpler .travis.yml files in other repos. See e.g. eddelbuettel/digest
 
 language: c
 dist: focal
@@ -9,27 +9,35 @@ dist: focal
 os:
   - linux
   #- osx
+  
 env:
   global:
     - OS=$(uname -s)
   matrix:
     - DEFAULTS_ONLY="1"
     - R_BUILD_ARGS=" " R_CHECK_ARGS="--as-cran" BOOTSTRAP_LATEX="1" _R_CHECK_CRAN_INCOMING_=TRUE BOOTSTRAP_PANDOC="1"
+
 script: ./run.sh run_tests
+
 notifications:
   email:
     on_success: change
     on_failure: change
+
 before_install:
   - cp run.sh fakepackage
   - cd fakepackage
   - ./run.sh bootstrap
+
 before_script:
   - ./run.sh dump_sysinfo
+
 after_success:
   - ./run.sh dump_logs_by_extension out
+
 after_failure:
   - ./run.sh dump_logs
+
 install:
   - ./run.sh install_deps
   # TESTS
@@ -39,20 +47,20 @@ install:
   # Test install_aptget with multiple arguments.
   # - if test ${OS} = Linux; then test -z "$(which tmux)"; fi
   # - if test ${OS} = Linux; then test -z "$(which sponge)"; fi
-  - if test ${OS} = Linux; then ./run.sh install_aptget tmux moreutils; fi
+  #- if test ${OS} = Linux; then ./run.sh install_aptget tmux moreutils; fi
   # - if test ${OS} = Linux; then test -n "$(which tmux)"; fi
   # - if test ${OS} = Linux; then test -n "$(which sponge)"; fi
   # Test install_r (which accepts multiple arguments).
-  - ./run.sh install_r stringr lubridate
-  - Rscript -e 'library(stringr); library(lubridate)'
+  #- ./run.sh install_r stringr lubridate
+  #- Rscript -e 'library(stringr); library(lubridate)'
   # Test github package installation (which accepts multiple arguments).
   #- Rscript -e 'stopifnot(!all(c("selectr", "rvest") %in% rownames(installed.packages())))'
   #- ./run.sh install_github sjp/selectr hadley/rvest
   #- Rscript -e 'library(selectr); library(rvest)'
   # Test R binary installation.
-  - if test ${OS} = Linux; then ./run.sh install_r_binary RUnit survey; fi
-  - if test ${OS} = Linux; then Rscript -e 'library(RUnit); library(survey)'; fi
-  - ./run.sh dump_sysinfo | grep -q 'R version '
+  #- if test ${OS} = Linux; then ./run.sh install_r_binary RUnit survey; fi
+  #- if test ${OS} = Linux; then Rscript -e 'library(RUnit); library(survey)'; fi
+  #- ./run.sh dump_sysinfo | grep -q 'R version '
   #- ./run.sh bioc_install GenomicFeatures AnnotationDbi
   #- Rscript -e 'library(GenomicFeatures); library(AnnotationDbi)'
   #- if test ${BOOTSTRAP_PANDOC} = 1; then pandoc --version; fi
