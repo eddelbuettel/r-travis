@@ -1,5 +1,5 @@
 
-## r-travis
+## r-travis: CI for R at Travis, GitHub Actions, Azure Pipelines, ...
 
 This repository is a maintained fork of the (now deprecated) original
 [r-travis](https://github.com/craigcitro/r-travis) repository by Craig Citro et al.  I was an early
