@@ -11,7 +11,7 @@
 <body>
   <div class="jumbotron">
     <div class="container">
-      <h2>eddelbuettel.github.io/r-travis: Continuing With the Original Travis CI Script for R</h2>
+      <h2>eddelbuettel.github.io/r-travis: CI for R at Travis, GitHub Actions, Azure Pipelines, ...</h2>
     </div>
   </div><!-- /.umbotron -->
   <div class="row"> &nbsp; </div>
@@ -26,17 +26,23 @@
         features -- so I am keeping it around.
 
         <p></p>
-
-        <h4>Why Not the New Travis R Setup? Why not GitHub Actions?</h4>
-
-        Given all our work around <a href="https://github.com/rocker-org/rocker">Rocker</a> (the container for R blessed
-        by Docker itself) where I am one-half of the project too, you'd expect me to be fully in support of a
-        container-based Travis. And you'd be right---I am. Containers rock.  And now we can use containers with Travis.
+        <h4>Status</h4>
+        Maintained and used across Travis. Also useable with Github Actions, Azure Pipelines, locally using Docker, ...
 
         <p></p>
+        Its main advantages as are <em>strong portability</em> as well as <em>ease of use</em> and <em>customizability</em>.
 
-        I also like the fact that I am essentially in control of my own script here, as you could simply by forking this
-        repo and sourcing from it.
+        <!-- <p></p> -->
+        <!-- <h4>Why Not the New Travis R Setup? Why not GitHub Actions?</h4> -->
+
+        <!-- Given all our work around <a href="https://github.com/rocker-org/rocker">Rocker</a> (the container for R blessed -->
+        <!-- by Docker itself) where I am one-half of the project too, you'd expect me to be fully in support of a -->
+        <!-- container-based Travis. And you'd be right---I am. Containers rock.  And now we can use containers with Travis. -->
+
+        <!-- <p></p> -->
+
+        <!-- I also like the fact that I am essentially in control of my own script here, as you could simply by forking this -->
+        <!-- repo and sourcing from it. -->
 
         <h4>Usage</h4>
 
@@ -47,24 +53,26 @@
         packages, and if you wish, can add your own packages via PPAs or else pull in from other matching PPAs.
         <p></p>
 
-        <h4>Status</h4>
+        <!-- <h4>Status</h4> -->
 
-        We have switched to supporting R 4.0.0 as well as the previous R 3.5.* API used up to R 3.6.3. As of mid-May
-        r-3.5 is still the default.  You can use a matrix of both versions too:
+        <!-- We have switched to supporting R 4.0.0 as well as the previous R 3.5.* API used up to R 3.6.3. As of mid-May -->
+        <!-- r-3.5 is still the default.  You can use a matrix of both versions too: -->
 
-        <pre>
-	jobs:
-	  include:
-	    - name: r-3.5
-	      env: R_VERSION="3.5"
-	    - name: r-4.0
-	      env: R_VERSION="4.0"
-        </pre>
+        <!-- <pre> -->
+	<!-- jobs: -->
+	<!--   include: -->
+	<!--     - name: r-3.5 -->
+	<!--       env: R_VERSION="3.5" -->
+	<!--     - name: r-4.0 -->
+	<!--       env: R_VERSION="4.0" -->
+        <!-- </pre> -->
         
         <h4>History</h4>
 
         This project started in August 2016 as a continuation of the initial `r-travis` project, and has been actively
-        used and maintained since. In May 2020 is was updated to R 4.0.0
+        used and maintained since. In May 2020 is was updated to R 4.0.0. As
+        of fall 2020, it now also support binaries via BSPM, and has been
+        used with Travis, GitHub Actions, and Azure Pipelines.
 
         <p></p>
 
@@ -84,7 +92,7 @@
    <footer class="footer">
      <div class="container">
        <a href="http://twitter.com/eddelbuettel"><i class="icon-twitter"></i></a>
-       <a href="https://plus.google.com/+DirkEddelbuettel"><i class="icon-google-plus"></i></a>
+       <!-- <a href="https://plus.google.com/+DirkEddelbuettel"><i class="icon-google-plus"></i></a> -->
        <a href="https://github.com/eddelbuettel"><i class="icon-github"></i></a>
        <!-- <a href="http://stackoverflow.com/users/143305/dirk-eddelbuettel"><i class="icon-stackexchange"></i></a> -->
        <a href="http://www.linkedin.com/in/dirkeddelbuettel/"><i class="icon-linkedin"></i></a>
