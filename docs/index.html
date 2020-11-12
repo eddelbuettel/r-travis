@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
-  <title>drat</title>
+  <title>r-travis</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
@@ -21,13 +21,13 @@
         
         <h4>About</h4>
 
-        This repository is a fork of the (deprecated) <a href="https://github.com/craigcitro/r-travis">r-travis</a>
-        repository by Craig Citro et al.  I was an early contributor to this project, and quite like its design and
-        features -- so I am keeping it around.
+        <a href="https://github.com/eddelbuettel/r-travis">This repository</a> is a fork of the (now deprecated) initial
+        <a href="https://github.com/craigcitro/r-travis">r-travis</a> repository by Craig Citro et al.  I was an early
+        contributor to this project, and quite like its design and features -- so I am keeping it around.
 
         <p></p>
         <h4>Status</h4>
-        Maintained and used across Travis. Also useable with Github Actions, Azure Pipelines, locally using Docker, ...
+        Maintained and used across Travis as well with Github Actions, Azure Pipelines, locally using Docker, ...
 
         <p></p>
         Its main advantages as are <em>strong portability</em> as well as <em>ease of use</em> and <em>customizability</em>.
@@ -46,12 +46,19 @@
 
         <h4>Usage</h4>
 
-        By now, all of my repositories have switched (and some moved on to using just Travis with Docker), as have
-        repositories of other users. You can search for these within the <a href="https://github.com/cran">GitHub CRAN
-        repo</a> by searching for <code>eddelbuettel/r-travis</code>.
-        One of the key advantages is that you can use a) the Rutter PPAs with over 4000 compiled <code>r-cran-*</code>
-        packages, and if you wish, can add your own packages via PPAs or else pull in from other matching PPAs.
+        <a href="https://github.com/eddelbuettel/r-travis">The repository README.md</a> has a simple <em>and completely
+        generic</em> example one can simply copy into <code>.travis.yml</code> and turn on support at Travis.
+
         <p></p>
+        As by now most of my repositories use this (though some also use Travis with custom Docker containers), examples
+        exists among my repostiries as well as among repositories of other users. TODO: Add a short list.
+
+        <p></p>
+
+        Useful (and somewhat recent) extensions include automated installation using BSPM (see <a
+        href="http://dirk.eddelbuettel.com/blog/2020/09/26#030_bspm_for_ci">this blog post for more</a>).  This takes advantage
+        of the Rutter PPAs with well over 4000 compiled <code>r-cran-*</code> packages,
+        and if you wish, can add your own packages via PPAs or else pull in from other matching PPAs.  <p></p>
 
         <!-- <h4>Status</h4> -->
 
@@ -70,9 +77,8 @@
         <h4>History</h4>
 
         This project started in August 2016 as a continuation of the initial `r-travis` project, and has been actively
-        used and maintained since. In May 2020 is was updated to R 4.0.0. As
-        of fall 2020, it now also support binaries via BSPM, and has been
-        used with Travis, GitHub Actions, and Azure Pipelines.
+        used and maintained since. In May 2020 is was updated to R 4.0.0. As of fall 2020, it now also support binaries
+        via BSPM, and has been used with Travis, GitHub Actions, and Azure Pipelines.
 
         <p></p>
 
