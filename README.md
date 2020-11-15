@@ -19,7 +19,7 @@ A minimal example of use with Travis follows:
 ```sh
 language: c
 sudo: required
-dist: bionic
+dist: focal
 
 before_install:
   - curl -OLs https://eddelbuettel.github.io/r-travis/run.sh && chmod 0755 run.sh
@@ -37,6 +37,13 @@ environment, then installs dependencies via `install_deps` and finally runs
 tests. For a realistic but real example see _e.g._ [this .travis.yml file of
 package
 digest](https://github.com/eddelbuettel/digest/blob/master/.travis.yml).
+
+For another example, see package
+[tidyCpp](https://github.com/eddelbuettel/tidycpp/) which shows how to use the
+`run.sh` script [with Travis
+CI](https://github.com/eddelbuettel/tidycpp/blob/master/.travis.yml) as well
+as [with GitHub
+Actions](https://github.com/eddelbuettel/tidycpp/blob/master/.github/workflows/R-CMD-check.yaml).
 
 Numerous variations are possible: running 'test matrices' across macOS and
 Linux, using BSPM for binaries (both of those [are used by
