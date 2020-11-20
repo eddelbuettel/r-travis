@@ -1,6 +1,6 @@
 #!/bin/bash
 # -*- sh-basic-offset: 4; sh-indentation: 4 -*-
-# Bootstrap an R/travis environment.
+# Bootstrap a CI environment for R
 
 set -e
 # Comment out this line for quieter output:
@@ -49,7 +49,7 @@ R_USE_BIOC_CMDS="source('${BIOC}');"\
 
 ShowBanner() {
     echo ""
-    echo "On Linux, r-travis defaults to using the most current R version, currently "
+    echo "On Linux, r-ci defaults to using the most current R version, currently "
     echo "the \"4.0\" API introduced by R 4.0.0."
     echo ""
     echo "But one can select another version explicitly by setting R_VERSION to \"3.5\""
