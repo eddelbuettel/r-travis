@@ -1,5 +1,5 @@
 
-## r-ci: CI for R at Travis, GitHub Actions, Azure Pipelines, ...
+## r-travis: CI for R at Travis, GitHub Actions, Azure Pipelines, ...
 
 This repository is a maintained fork of the (now deprecated) original
 [r-travis](https://github.com/craigcitro/r-travis) repository by Craig Citro et al.  I was an early
@@ -13,6 +13,11 @@ Maintained and used across Travis and GitHub Actions -- and also usable with
 Azure Pipelines, locally using Docker, ...
 
 Its main advantages as are _strong portability_ as well as _ease of use_ and _customizability_. 
+
+Note that as it is used beyond just one Continuous Integration (CI) backend, we decided to change
+the name away from reflecting only one of the backends. So please see the
+[r-ci](https://github.com/eddelbuettel/r-ci) for the continuation of this work.
+
 
 ### Basic Usage
 
@@ -60,7 +65,9 @@ shell script `run.sh`.
 
 ### More
 
-See the [public webpage for r-ci](http://eddelbuettel.github.io/r-ci/) for more.
+See the [webpage for r-travis](http://eddelbuettel.github.io/r-travis/) for more on this repo, and
+the [webpage for r-ci](http://eddelbuettel.github.io/r-ci/) for more on its successor and
+continuation.
 
 ### Author
 

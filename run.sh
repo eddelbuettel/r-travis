@@ -49,7 +49,10 @@ R_USE_BIOC_CMDS="source('${BIOC}');"\
 
 ShowBanner() {
     echo ""
-    echo "On Linux, r-ci defaults to using the most current R version, currently "
+    echo "** This is the older r-travis/run.sh. Consider using the newer"
+    echo "** https://eddelbuettel.github.io/r-ci/run.sh instead."
+    echo ""
+    echo "On Linux, r-travis defaults to using the most current R version, currently "
     echo "the \"4.0\" API introduced by R 4.0.0."
     echo ""
     echo "But one can select another version explicitly by setting R_VERSION to \"3.5\""
